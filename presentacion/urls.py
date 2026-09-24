@@ -1,3 +1,7 @@
 from django.urls import path
 
-urlpatterns = []
+from . import views
+
+urlpatterns = [
+    path("belen/", views.pagina_belen, name="pagina_belen"),
+]

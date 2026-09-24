@@ -48,3 +48,7 @@ python manage.py runserver
 ```
 
 Abre <http://127.0.0.1:8000/> en el navegador. Para detener el servidor, presiona `Ctrl+C`.
+
+## Integrantes Equipo ScorpIO
+
+- Belén — Responsable y Colaboración: http://127.0.0.1:8000/belen/
