@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from django.http import HttpResponse
 
-# Create your views here.
+
+def pagina_belen(request):
+    return HttpResponse(
+        "<h1>Belén</h1>"
+        "<p>Rol en ScorpIO: Responsable y Colaboración</p>"
+    )
