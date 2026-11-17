@@ -5,3 +5,4 @@ __pycache__/
 db.sqlite3
 correos_desarrollo/
 .DS_Store
+media/
