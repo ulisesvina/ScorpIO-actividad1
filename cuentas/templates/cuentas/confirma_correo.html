@@ -1,0 +1,17 @@
+{% extends "cuentas/base.html" %}
+{% block titulo %}Confirma tu correo{% endblock %}
+{% block contenido %}
+  <h1>Confirma tu correo</h1>
+  {% if enviado %}
+    <div class="aviso exito">Si el correo corresponde a una cuenta pendiente de verificación, enviamos un enlace de confirmación a <strong>{{ correo }}</strong>.</div>
+    <p>Abre el enlace para activar tu cuenta. El enlace tiene una vigencia limitada.</p>
+  {% else %}
+    <div class="aviso error" role="alert">No se pudo enviar el correo de confirmación. Tu cuenta quedó pendiente de verificación. Intenta más tarde.</div>
+  {% endif %}
+  <form method="post" action="{% url 'cuentas:reenviar_correo' %}">
+    {% csrf_token %}
+    <input type="hidden" name="correo" value="{{ correo }}">
+    <button type="submit" class="boton secundario">Reenviar correo</button>
+  </form>
+  <p class="pie"><a href="{% url 'cuentas:registro' %}">Volver al registro</a></p>
+{% endblock %}
