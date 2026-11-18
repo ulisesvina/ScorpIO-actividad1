@@ -1,0 +1,74 @@
+{% extends "espacios/base.html" %}
+{% block titulo %}Publicar espacio{% endblock %}
+{% block contenido %}
+  {% include "espacios/_pasos.html" with paso=2 titulo_paso="Precio y disponibilidad" %}
+
+  {% if mostrar_errores and form.errors or mostrar_errores and horarios_form.total_error_count %}
+    <div class="aviso error" role="alert">Revise los campos señalados antes de continuar.</div>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="dos-columnas">
+      {% if mostrar_errores %}
+        {% include "cuentas/_campo.html" with campo=form.precio %}
+        {% include "cuentas/_campo.html" with campo=form.periodo %}
+      {% else %}
+        <div class="campo"><label for="{{ form.precio.id_for_label }}">{{ form.precio.label }}<span class="obligatorio">*</span></label>{{ form.precio }}</div>
+        <div class="campo"><label for="{{ form.periodo.id_for_label }}">{{ form.periodo.label }}<span class="obligatorio">*</span></label>{{ form.periodo }}</div>
+      {% endif %}
+    </div>
+
+    {% if aviso and aviso_tipo == 'pendiente' and sincronizado %}<div class="aviso provisional">{{ aviso }}</div>{% endif %}
+    {% if aviso and aviso_tipo == 'error' %}<div class="aviso error" role="alert">{{ aviso }}</div>{% endif %}
+
+    <label class="titulo-campo">Horarios<span class="obligatorio">*</span></label>
+    {{ horarios_form.management_form }}
+    <table class="horarios">
+      <thead>
+        <tr><th>Día</th><th>{% if sincronizado %}Estado{% else %}Disponible{% endif %}</th><th>Hora inicial</th><th>Hora final</th><th>Eliminar</th></tr>
+      </thead>
+      <tbody>
+        {% for fila, estado in filas %}
+          <tr class="{% if mostrar_errores and fila.con_error or mostrar_errores and fila.errors %}fila-error{% elif estado.ocupado %}fila-ocupada{% elif estado and not estado.activo %}fila-desactivada{% endif %}">
+            <td>{{ fila.dia }}</td>
+            <td>
+              {{ fila.disponible }}
+              {% if estado %}
+                {% if estado.ocupado %}<span class="estado ocupado">Ocupado en Google Calendar</span>
+                {% elif not estado.activo %}<span class="estado">Desactivado por la Empresa</span>
+                {% else %}<span class="estado libre">Disponible</span>{% endif %}
+              {% endif %}
+            </td>
+            <td>{{ fila.hora_inicio }}</td>
+            <td>{{ fila.hora_fin }}</td>
+            <td>{{ fila.DELETE }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if mostrar_errores %}{% for error in horarios_form.non_form_errors %}<p class="error" role="alert">{{ error }}</p>{% endfor %}{% endif %}
+    <button type="submit" class="boton secundario chico" name="accion" value="agregar_horario">+ Añadir horario</button>
+
+    <div class="calendario {% if sincronizado %}sincronizado{% endif %}">
+      {% if not calendario_vinculado %}
+        <span>Google Calendar no está vinculado.</span>
+        <a class="boton chico" href="{% url 'espacios:vincular_calendario' %}">Vincular Google Calendar</a>
+      {% elif sincronizado %}
+        <span>Google Calendar sincronizado.</span>
+        <button type="submit" class="boton secundario chico" name="accion" value="sincronizar">Sincronizar nuevamente</button>
+      {% else %}
+        <span>Google Calendar conectado. Sincronización pendiente.</span>
+        <button type="submit" class="boton chico" name="accion" value="sincronizar">Sincronizar Google Calendar</button>
+      {% endif %}
+    </div>
+    {% if aviso and aviso_tipo == 'exito' %}<div class="aviso exito">{{ aviso }}</div>{% endif %}
+
+    <div class="acciones">
+      <button type="submit" class="boton secundario" name="accion" value="atras">Atrás</button>
+      <button type="submit" class="boton" name="accion" value="siguiente"{% if not puede_continuar %} disabled{% endif %}>Siguiente</button>
+    </div>
+
+    {% include "espacios/_error_modal.html" with titulo_modal="No fue posible sincronizar el calendario" accion_reintentar="sincronizar" %}
+  </form>
+{% endblock %}

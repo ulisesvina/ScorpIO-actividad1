@@ -1,0 +1,26 @@
+{% extends "espacios/base.html" %}
+{% block titulo %}Vincular Google Calendar{% endblock %}
+{% block contenido %}
+  <h1>Vincular Google Calendar</h1>
+  <p class="sub">Reserva-Hub revisa su calendario para no publicar horarios que ya estén ocupados.</p>
+
+  {% if error %}<div class="aviso error" role="alert">{{ error }}</div>{% endif %}
+  {% if vinculado and not error %}<div class="aviso exito">Su Google Calendar ya está vinculado. Puede cambiarlo aquí.</div>{% endif %}
+
+  <ol class="instrucciones">
+    <li>Abra Google Calendar y entre a <em>Configuración y uso compartido</em> del calendario que usará.</li>
+    <li>En <em>Compartir con personas específicas</em>, agregue
+      {% if correo_servicio %}<code>{{ correo_servicio }}</code>{% else %}la cuenta de servicio de Reserva-Hub{% endif %}
+      con el permiso <em>Ver solo información de disponible/ocupado</em>.</li>
+    <li>Copie el <em>ID del calendario</em> (sección <em>Integrar el calendario</em>) y péguelo abajo.</li>
+  </ol>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "cuentas/_campo.html" with campo=form.id_calendario %}
+    <div class="acciones">
+      <a class="boton secundario" href="{% url 'espacios:mis_espacios' %}">Cancelar</a>
+      <button type="submit" class="boton">Vincular</button>
+    </div>
+  </form>
+{% endblock %}

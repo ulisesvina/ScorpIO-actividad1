@@ -94,8 +94,12 @@ class Tarifa(models.Model):
         verbose_name = 'tarifa'
         verbose_name_plural = 'tarifas'
 
+    UNIDADES = {POR_HORA: 'hora', POR_DIA: 'día', POR_SEMANA: 'semana'}
+
     def __str__(self):
-        return '$%s / %s' % (self.precio, self.get_periodo_display().lower())
+        """Como en los prototipos: «$350 / hora», «$1,800 / día», «$12,000 / semana»."""
+        decimales = 0 if self.precio == self.precio.to_integral_value() else 2
+        return '$%s / %s' % (format(self.precio, ',.%df' % decimales), self.UNIDADES.get(self.periodo, ''))
 
     def es_valida(self):
         periodos = [clave for clave, _ in self.PERIODOS]

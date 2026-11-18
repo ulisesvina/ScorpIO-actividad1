@@ -1,0 +1,22 @@
+{% extends "espacios/base.html" %}
+{% block titulo %}Mis espacios{% endblock %}
+{% block contenido %}
+  <div class="encabezado">
+    <h1>Mis espacios</h1>
+    <a class="boton" href="{% url 'espacios:formulario_espacio' %}">+ Publicar espacio</a>
+  </div>
+
+  {% for espacio in espacios %}
+    <div class="espacio">
+      {% with foto=espacio.fotografias.all.0 %}
+        {% if foto %}<img class="miniatura" src="{{ foto.archivo.url }}" alt="">{% else %}<div class="miniatura"></div>{% endif %}
+      {% endwith %}
+      <div>
+        <strong>{{ espacio.nombre }}</strong> <span class="etiqueta">{{ espacio.get_estado_display }}</span>
+        <div class="detalle">{{ espacio.direccion }} · {{ espacio.capacidad }} personas{% if espacio.tarifa %} · {{ espacio.tarifa }}{% endif %}</div>
+      </div>
+    </div>
+  {% empty %}
+    <p class="vacio">Todavía no tienes espacios publicados.</p>
+  {% endfor %}
+{% endblock %}

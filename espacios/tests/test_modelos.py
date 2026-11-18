@@ -47,6 +47,11 @@ class TarifaTests(TestCase):
         self.assertFalse(Tarifa(precio=Decimal('0'), periodo=Tarifa.POR_HORA).es_valida())
         self.assertFalse(Tarifa(precio=Decimal('-5'), periodo=Tarifa.POR_DIA).es_valida())
 
+    def test_texto_como_en_los_prototipos(self):
+        self.assertEqual(str(Tarifa(precio=Decimal('350'), periodo=Tarifa.POR_HORA)), '$350 / hora')
+        self.assertEqual(str(Tarifa(precio=Decimal('1800'), periodo=Tarifa.POR_DIA)), '$1,800 / día')
+        self.assertEqual(str(Tarifa(precio=Decimal('99.50'), periodo=Tarifa.POR_SEMANA)), '$99.50 / semana')
+
     def test_sin_periodo_no_es_valida(self):
         self.assertFalse(Tarifa(precio=Decimal('350'), periodo='').es_valida())
 

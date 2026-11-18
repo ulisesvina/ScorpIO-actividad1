@@ -151,3 +151,16 @@ class ConjuntoBaseHorarios(BaseFormSet):
 ConjuntoHorarios = formset_factory(
     FormularioHorario, formset=ConjuntoBaseHorarios, extra=0, can_delete=True,
 )
+
+
+class FormularioVincularCalendario(forms.Form):
+    """Precondición del caso de uso: la Empresa vincula su Google Calendar."""
+
+    id_calendario = forms.CharField(
+        label='ID de tu Google Calendar', max_length=255,
+        error_messages={'required': 'Ingrese el ID de su Google Calendar'},
+        widget=forms.TextInput(attrs={'placeholder': 'Ej. tu_cuenta@gmail.com'}),
+    )
+
+    def clean_id_calendario(self):
+        return self.cleaned_data['id_calendario'].strip()

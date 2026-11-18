@@ -1,0 +1,7 @@
+<h1>Publicar espacio</h1>
+<p class="sub">Paso {{ paso }} de 3: {{ titulo_paso }}{% if paso == 1 %} · Los campos marcados con * son obligatorios.{% endif %}</p>
+<div class="pasos" aria-hidden="true">
+  <span class="activo"></span>
+  <span{% if paso >= 2 %} class="activo"{% endif %}></span>
+  <span{% if paso >= 3 %} class="activo"{% endif %}></span>
+</div>

@@ -1,0 +1,11 @@
+{% if error_modal %}
+<dialog class="modal" open>
+  <div class="icono-error" aria-hidden="true">×</div>
+  <h2>{{ titulo_modal }}</h2>
+  <p role="alert">{{ error_modal }}</p>
+  <div class="acciones centradas">
+    <button type="button" class="boton secundario" onclick="this.closest('dialog').close()">Cerrar</button>
+    <button type="submit" class="boton" name="accion" value="{{ accion_reintentar }}">Reintentar</button>
+  </div>
+</dialog>
+{% endif %}
