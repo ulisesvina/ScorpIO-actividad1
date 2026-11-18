@@ -105,3 +105,49 @@ export DEFAULT_FROM_EMAIL="Reserva-Hub <tu_cuenta@gmail.com>"
 ```
 
 No subas credenciales al repositorio.
+
+## Publicar espacio (caso de uso 4)
+
+Solo pueden entrar cuentas de tipo Empresa que hayan iniciado sesión. Rutas de la app `espacios`:
+
+| Ruta | Para qué sirve |
+|---|---|
+| `/espacios/` | Mis espacios |
+| `/espacios/publicar/` | Paso 1: información general y fotos |
+| `/espacios/publicar/precio-y-horarios/` | Paso 2: precio, modalidad, horarios y sincronizar con Google Calendar |
+| `/espacios/publicar/revisar/` | Paso 3: revisar y publicar |
+| `/espacios/<id>/publicado/` | Mensaje de espacio publicado |
+| `/espacios/google-calendar/` | Vincular el Google Calendar de la empresa |
+
+### Configurar Google Calendar
+
+1. En Google Cloud crear un proyecto, habilitar **Google Calendar API**, crear una **cuenta de servicio** (sin roles) y descargar su clave en JSON.
+2. Guardar la clave fuera del repositorio y decirle a Django dónde está:
+   ```bash
+   export GOOGLE_CALENDAR_CREDENCIALES="$HOME/.config/reserva-hub/google-calendar.json"
+   ```
+3. En Google Calendar, compartir el calendario con el correo de la cuenta de servicio con el permiso "Ver solo disponibilidad" y copiar el ID del calendario.
+4. En la página, entrar a "Vincular Google Calendar" y pegar el ID.
+
+Si no está configurada la variable, al sincronizar sale "No fue posible sincronizar el calendario" (flujo E1).
+
+### Probarlo en local
+
+Como todavía no está "Iniciar sesión", se puede entrar desde el admin con una empresa marcada como staff. Para crear una de prueba:
+
+```bash
+python manage.py shell -c "
+from cuentas.models import Usuario, Empresa
+u, _ = Usuario.objects.get_or_create(correo='empresa.prueba@ejemplo.com', defaults=dict(nombre='Clínica Ejemplo', es_empresa=True, is_active=True, is_staff=True))
+u.set_password('Reserva2026-Hub'); u.save()
+Empresa.objects.get_or_create(usuario=u, defaults=dict(rfc='CEJ010203AB1'))
+"
+```
+
+Después entrar a <http://127.0.0.1:8000/admin/login/?next=/espacios/>.
+
+### Pruebas
+
+```bash
+python manage.py test espacios
+```
