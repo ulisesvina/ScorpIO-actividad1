@@ -1,8 +1,8 @@
 """AlmacenDeImagenes: guarda las fotografías de los espacios en el disco local (MEDIA_ROOT)
 
-Las imágenes se guardan primero en una carpeta temporal para
-detectar a tiempo una falla de almacenamiento, luego  al publicar, `guardar_fotografias`
-las mueve a su ubicación definitiva 
+Las imágenes se guardan primero en una carpeta temporal (paso 1 del formulario) para
+detectar a tiempo una falla de almacenamiento y al publicar, `guardar_fotografias`
+las copia a su ubicación definitiva 
 """
 import logging
 import uuid
@@ -27,7 +27,7 @@ def _nombre_unico(carpeta, formato):
 def guardar_temporal(archivo, formato):
     """Guarda una imagen ya validada en la carpeta temporal
 
-    Devuelve un dict con nombre_archivo, ruta y formato, q si es valido  para guardarse en la sesion
+    Devuelve un dict con nombre_archivo, ruta y formato, apto para guardarse en la sesión
     """
     try:
         ruta = default_storage.save(_nombre_unico(CARPETA_TEMPORAL, formato), archivo)
@@ -38,10 +38,11 @@ def guardar_temporal(archivo, formato):
 
 
 def guardar_fotografias(temporales):
-    """Mueve las imágenes temporales a su ubicación definitiva
+    """Copia las imágenes temporales a su ubicación definitiva
 
     Devuelve la lista de dicts con la ruta definitiva. Si alguna falla, elimina las
-    que ya se habían movido y lanza ErrorAlmacenamiento
+    que ya se habían copiado y lanza ErrorAlmacenamiento. Las temporales NO se borran
+    aquí: se descartan hasta que el espacio quede registrado, para poder reintentar 
     """
     guardadas = []
     try:
@@ -53,12 +54,11 @@ def guardar_fotografias(temporales):
         logger.exception('Falló el almacenamiento definitivo de las fotografías')
         eliminar_fotografias([g['ruta'] for g in guardadas])
         raise ErrorAlmacenamiento() from error
-    descartar_temporales(temporales)
     return guardadas
 
 
 def eliminar_fotografias(rutas):
-    """Borra imágenes del almacenamiento y no lanza excepciones"""
+    """Borra imágenes del almacenamiento. Nunca lanza excepciones"""
     for ruta in rutas:
         try:
             default_storage.delete(ruta)

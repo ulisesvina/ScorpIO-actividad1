@@ -1,4 +1,4 @@
-"""Pruebas de AlmacenDeImagenes"""
+"""Pruebas de AlmacenDeImagenes."""
 import shutil
 import tempfile
 from unittest import mock
@@ -29,12 +29,12 @@ class AlmacenDeImagenesTests(SimpleTestCase):
         self.assertTrue(temporal['ruta'].startswith(almacen.CARPETA_TEMPORAL))
         self.assertTrue(default_storage.exists(temporal['ruta']))
 
-    def test_guardar_fotografias_mueve_a_definitiva(self):
+    def test_guardar_fotografias_copia_a_definitiva(self):
         temporal = almacen.guardar_temporal(archivo(), 'JPEG')
         [guardada] = almacen.guardar_fotografias([temporal])
         self.assertTrue(guardada['ruta'].startswith(almacen.CARPETA_DEFINITIVA))
         self.assertTrue(default_storage.exists(guardada['ruta']))
-        self.assertFalse(default_storage.exists(temporal['ruta']))
+        self.assertTrue(default_storage.exists(temporal['ruta']))  # se descarta después
 
     def test_falla_al_guardar_temporal(self):
         with mock.patch.object(default_storage, 'save', side_effect=OSError('disco lleno')):
