@@ -83,6 +83,9 @@ class Empresa(models.Model):
         Usuario, on_delete=models.CASCADE, related_name='empresa',
     )
     rfc = models.CharField('RFC o registro fiscal', max_length=13)
+    # Agregado por el caso de uso Publicar espacio (integración con Google Calendar)
+    # Vacío mientras la Empresa no vincule su calendario
+    id_calendario = models.CharField('ID de Google Calendar', max_length=255, blank=True)
 
     class Meta:
         verbose_name = 'empresa'
