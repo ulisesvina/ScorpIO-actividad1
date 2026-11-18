@@ -160,3 +160,8 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Reserva-Hub <no-reply
 # AlmacenDeImagenes guarda aquí las imágenes; no hay hosting, se usa  local
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Google Calendar (cuenta de servicio),  ruta al archivo JSON de la llave; NUNCA
+# guardar la llave dentro del repositorio, si no se define, la sincronización
+# responde como "Google Calendar no disponible" 
+GOOGLE_CALENDAR_CREDENCIALES = os.environ.get('GOOGLE_CALENDAR_CREDENCIALES', '')
