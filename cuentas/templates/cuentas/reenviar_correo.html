@@ -1,0 +1,14 @@
+{% extends "cuentas/base.html" %}
+{% block titulo %}Reenviar correo{% endblock %}
+{% block contenido %}
+  <h1>Reenviar correo de confirmación</h1>
+  <p class="sub">Escribe el correo con el que te registraste.</p>
+  {% if form.non_field_errors %}
+    <div class="aviso error" role="alert">{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+  {% endif %}
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "cuentas/_campo.html" with campo=form.correo %}
+    <button type="submit" class="boton">Reenviar correo</button>
+  </form>
+{% endblock %}

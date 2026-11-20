@@ -1,0 +1,25 @@
+{% extends "cuentas/base.html" %}
+{% load static %}
+{% block titulo %}Inicio{% endblock %}
+{% block estilos %}<link rel="stylesheet" href="{% static 'cuentas/inicio.css' %}">{% endblock %}
+{% block contenido %}
+  <h1>Hola, {{ usuario.nombre }}</h1>
+  <p class="sub">
+    <span class="etiqueta">{% if usuario.is_superuser %}Administrador{% else %}Cuenta de {{ usuario.tipo_cuenta|lower }}{% endif %}</span>
+  </p>
+
+  <div class="accesos">
+    {% if usuario.es_empresa %}
+      <div class="acceso pendiente">Mis espacios <small>Próximamente</small></div>
+      <div class="acceso pendiente">Publicar espacio <small>Próximamente</small></div>
+    {% endif %}
+    <div class="acceso pendiente">Buscar espacios <small>Próximamente</small></div>
+    <div class="acceso pendiente">Mis reservas <small>Próximamente</small></div>
+    <div class="acceso pendiente">Mi perfil <small>Próximamente</small></div>
+    <div class="acceso pendiente">Cerrar sesión <small>Próximamente</small></div>
+  </div>
+
+  {% if usuario.is_staff %}
+    <p class="pie"><a href="{% url 'admin:index' %}">Panel de administración</a></p>
+  {% endif %}
+{% endblock %}

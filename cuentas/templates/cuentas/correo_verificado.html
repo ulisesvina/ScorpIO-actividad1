@@ -1,0 +1,8 @@
+{% extends "cuentas/base.html" %}
+{% block titulo %}Cuenta activada{% endblock %}
+{% block contenido %}
+  <h1>Correo verificado</h1>
+  <div class="aviso exito">Correo verificado. Ya puedes iniciar sesión.</div>
+  <p>Tu cuenta de {{ usuario.tipo_cuenta|lower }} <strong>{{ usuario.correo }}</strong> está activa.</p>
+  <a class="boton" href="{% url 'cuentas:iniciar_sesion' %}">Iniciar sesión</a>
+{% endblock %}

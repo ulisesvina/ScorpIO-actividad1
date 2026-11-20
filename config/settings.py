@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'presentacion',
+    'cuentas',
 ]
 
 MIDDLEWARE = [
@@ -88,6 +90,7 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'OPTIONS': {'user_attributes': ('nombre', 'correo')},
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
@@ -104,9 +107,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-mx'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Mexico_City'
 
 USE_I18N = True
 
@@ -122,3 +125,29 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# --- Cuentas (caso de uso Registrar Usuario) ---
+
+AUTH_USER_MODEL = 'cuentas.Usuario'
+
+LOGIN_URL = 'cuentas:iniciar_sesion'
+LOGIN_REDIRECT_URL = 'cuentas:inicio'
+
+# Vigencia del enlace de verificación de correo (la especificación no la define).
+VERIFICACION_CORREO_HORAS = int(os.environ.get('VERIFICACION_CORREO_HORAS', '24'))
+
+# Correo. Por defecto (desarrollo) los mensajes se imprimen en la terminal donde
+# corre `runserver`. Alternativa: EMAIL_BACKEND=django.core.mail.backends.filebased.EmailBackend
+# guarda cada mensaje como archivo en EMAIL_FILE_PATH.
+# Para un SMTP real, definir las variables de entorno EMAIL_BACKEND
+# (django.core.mail.backends.smtp.EmailBackend), EMAIL_HOST, EMAIL_PORT,
+# EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USE_TLS y DEFAULT_FROM_EMAIL.
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_FILE_PATH = BASE_DIR / 'correos_desarrollo'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '25'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'false').lower() in ('1', 'true', 'si', 'sí')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Reserva-Hub <no-reply@reserva-hub.local>')
