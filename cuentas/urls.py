@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import views, views_sesion
 
 app_name = 'cuentas'
 
@@ -9,6 +9,6 @@ urlpatterns = [
     path('confirma-tu-correo/', views.confirma_correo, name='confirma_correo'),
     path('verificar/<str:token>/', views.verificar, name='verificar'),
     path('reenviar-correo/', views.reenviar_correo, name='reenviar_correo'),
-    # PROVISIONAL: se reemplaza al implementar el caso de uso Iniciar sesión.
-    path('iniciar-sesion/', views.iniciar_sesion, name='iniciar_sesion'),
+    path('iniciar-sesion/', views_sesion.iniciar_sesion, name='iniciar_sesion'),
+    path('inicio/', views_sesion.inicio, name='inicio'),
 ]

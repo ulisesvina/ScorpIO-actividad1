@@ -67,7 +67,8 @@ Rutas (app `cuentas`):
 | `/cuentas/confirma-tu-correo/` | Aviso de correo enviado y botón «Reenviar correo» |
 | `/cuentas/verificar/<token>/` | Enlace que activa la cuenta |
 | `/cuentas/reenviar-correo/` | Reenvío del enlace |
-| `/cuentas/iniciar-sesion/` | **Provisional**: se reemplaza al implementar «Iniciar sesión» |
+| `/cuentas/iniciar-sesion/` | Inicio de sesión (ver más abajo) |
+| `/cuentas/inicio/` | Pantalla de inicio (requiere sesión) |
 
 ### Probarlo en local
 
@@ -105,3 +106,16 @@ export DEFAULT_FROM_EMAIL="Reserva-Hub <tu_cuenta@gmail.com>"
 ```
 
 No subas credenciales al repositorio.
+
+
+## Inicio de sesión (caso de uso 2)
+
+- Se entra con **correo y contraseña** en `/cuentas/iniciar-sesion/`. Solo pueden entrar las cuentas **activas** (con el correo ya verificado).
+- Si la cuenta aún está pendiente de verificación, no se crea la sesión y se ofrece «Reenviar correo».
+- Tras iniciar sesión se lleva a `/cuentas/inicio/` (o a la página que se pidió, si es del mismo sitio).
+- La sesión usa el sistema de sesiones de Django (cookie de sesión; duración por defecto de 2 semanas).
+- **Cerrar sesión aún no está implementado** (es otro caso de uso). Mientras tanto, para salir borra la cookie de sesión del navegador o usa una ventana privada.
+
+Probarlo: registra una cuenta, abre el enlace del correo que imprime la terminal y luego inicia sesión en <http://127.0.0.1:8000/cuentas/iniciar-sesion/>.
+
+Pruebas del caso de uso: `python manage.py test cuentas.tests.test_inicio_sesion`

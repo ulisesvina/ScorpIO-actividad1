@@ -86,8 +86,3 @@ def reenviar_correo(request):
         form = FormularioReenvio(initial={'correo': request.session.get(SESION_CORREO, '')})
     return render(request, 'cuentas/reenviar_correo.html', {'form': form})
 
-
-@require_GET
-def iniciar_sesion(request):
-    """PROVISIONAL: marcador de posición hasta implementar el caso de uso Iniciar sesión."""
-    return render(request, 'cuentas/iniciar_sesion_provisional.html')
