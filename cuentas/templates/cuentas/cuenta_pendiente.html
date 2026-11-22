@@ -1,0 +1,13 @@
+{% extends "cuentas/base.html" %}
+{% block titulo %}Confirma tu correo{% endblock %}
+{% block contenido %}
+  <h1>Confirma tu correo</h1>
+  <div class="aviso info">Tu cuenta <strong>{{ correo }}</strong> todavía no está verificada, así que no pudimos iniciar tu sesión.</div>
+  <p>Abre el enlace de confirmación que te enviamos al registrarte. Si ya venció o no lo encuentras, puedes pedir uno nuevo.</p>
+  <form method="post" action="{% url 'cuentas:reenviar_correo' %}">
+    {% csrf_token %}
+    <input type="hidden" name="correo" value="{{ correo }}">
+    <button type="submit" class="boton secundario">Reenviar correo</button>
+  </form>
+  <p class="pie"><a href="{% url 'cuentas:iniciar_sesion' %}">Volver a iniciar sesión</a></p>
+{% endblock %}
