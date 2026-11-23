@@ -1,0 +1,29 @@
+{% load static %}
+{% url 'espacios:buscar_espacios' as url_buscar %}
+{% url 'espacios:mis_espacios' as url_mis_espacios %}
+<nav class="menu-usuario">
+  <a href="{% url 'cuentas:inicio' %}">Inicio</a>
+  {% if url_buscar %}<a href="{{ url_buscar }}">Buscar espacios</a>{% endif %}
+  {% if user.es_empresa and url_mis_espacios %}<a href="{{ url_mis_espacios }}">Mis espacios</a>{% endif %}
+  <button type="button" class="enlace-boton" data-abrir-cerrar-sesion>Cerrar sesión</button>
+</nav>
+
+<dialog class="dialogo" id="dialogo-cerrar-sesion">
+  <h2>Cerrar sesión</h2>
+  <p>¿Estás seguro de que deseas salir del sistema?</p>
+  <form method="post" id="form-cerrar-sesion" action="{% url 'cuentas:cerrar_sesion' %}"
+        data-destino="{% url 'cuentas:iniciar_sesion' %}">
+    {% csrf_token %}
+    <div class="acciones">
+      <button type="button" class="boton secundario" id="cancelar-cerrar-sesion">Cancelar</button>
+      <button type="submit" class="boton">Confirmar salida</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="dialogo" id="dialogo-error-conexion">
+  <div class="icono-aviso" aria-hidden="true">!</div>
+  <p role="alert">Se ha cerrado la sesión localmente debido a un problema de conexión.</p>
+  <div class="acciones"><button type="button" class="boton" id="aceptar-error-conexion">Entendido</button></div>
+</dialog>
+<script src="{% static 'cuentas/cerrar_sesion.js' %}"></script>

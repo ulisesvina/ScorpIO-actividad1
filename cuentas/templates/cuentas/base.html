@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block titulo %}Reserva-Hub{% endblock %} · Reserva-Hub</title>
   <link rel="stylesheet" href="{% static 'cuentas/estilos.css' %}">
+  <link rel="stylesheet" href="{% static 'cuentas/sesion.css' %}">
   {% block estilos %}{% endblock %}
 </head>
 <body>
-  <header class="cabecera">Reserva-Hub</header>
+  <header class="cabecera">
+    <span>Reserva-Hub</span>
+    {% if user.is_authenticated %}{% include "cuentas/_menu_usuario.html" %}{% endif %}
+  </header>
+  {% include "cuentas/_mensajes.html" %}
   <main>
     <div class="tarjeta">
       {% block contenido %}{% endblock %}
