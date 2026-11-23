@@ -68,3 +68,47 @@ Especificación de requerimientos, del Diseño detallado o del Plan, para homolo
 ## Riesgos y limitaciones
 43. No hay límite de intentos fallidos de inicio de sesión (fuerza bruta). Recomendable antes de cualquier despliegue.
 
+
+---
+
+# Anotaciones — Caso de uso 4: Publicar espacio (Belén)
+
+Igual que en Registrar usuario, aquí anoto lo que quedó diferente a lo que dicen los documentos
+para que lo actualicemos después. Me basé sobre todo en el diagrama de clases de Publicar espacio
+y en el diagrama de secuencia, y cuando les faltaba algo lo tomé del diagrama general.
+
+## Especificación de requerimientos
+1. En las pantallas puse "Empresa" en lugar de "Proveedor", porque en el Plan quedamos en usar "empresa". También hay que cambiarlo en el paso 6 del flujo normal.
+2. Los mensajes son los mismos de la especificación. Ojo: para E3 hay dos versiones, el flujo dice "Ocurrió un problema al guardar las imágenes. Intente nuevamente" y el caso de prueba E-3 dice "No fue posible guardar las fotografías. Intenta cargarlas nuevamente". Usé el del flujo, hay que dejar uno solo.
+3. Formatos de foto: solo JPEG y PNG, porque no estaba definido. Además se revisa que el archivo de verdad sea una imagen y no solo que tenga la extensión.
+4. Los horarios son semanales (día de la semana con hora de inicio y fin) y valen del 1 de noviembre al 31 de diciembre de 2026, como lo acordamos.
+5. Conflicto con Google Calendar (A5 y A9): si un día de ese horario ya tiene un evento, todo el horario de ese día de la semana se marca como "Ocupado en Google Calendar". Las fechas que ya pasaron no se toman en cuenta.
+6. Los horarios ocupados sí se guardan, pero con disponible = False, para que no aparezcan como disponibles (así lo pide la poscondición).
+7. Cuando sale "Datos guardados y calendario sincronizado" los datos se guardan en la sesión, no en la base de datos. Todo se guarda hasta que se presiona "Publicar", igual que en el diagrama de secuencia.
+8. Si después de sincronizar se cambia el precio o algún horario, hay que volver a sincronizar antes de poder continuar.
+9. Agregué dos cosas que no vienen en el prototipo: quitar una foto que ya se subió y eliminar una fila de horario. Sin eso no había forma de corregir los casos A2 y A4.
+10. La precondición dice que la empresa ya tiene vinculado Google Calendar, pero ningún caso de uso explica cómo. Hice la pantalla "Vincular Google Calendar": la empresa comparte su calendario con la cuenta de servicio de Reserva-Hub (permiso "Ver solo disponibilidad") y escribe el ID de su calendario.
+11. En "Espacio publicado" no puse el botón "Ver espacio" porque ese caso de uso todavía no está. Tampoco puse el menú lateral (Inicio, Reservas, Perfil) porque esas pantallas aún no existen.
+12. En los prototipos de las páginas 43 y 44 están cambiados los títulos de "Después de sincronizar" y "Revisar y publicar". La imagen de "Falla al guardar las fotografías" está vacía.
+
+## Diseño detallado (diagramas)
+13. Algunas pantallas tienen nombres distintos entre diagramas (FormularioEspacio / FormularioEspacioIH, PantallaPrecioYHorarios / PantallaPrecioYDisponibilidadIH, MisEspaciosIH / PantallaMisEspaciosIH / PantallaEspacioH). Todas quedaron como plantillas. PublicarEspacioServicio y PublicarEspacioService son la misma clase, está en servicios/publicar_espacio.py.
+14. EspacioRepository, EspacioBD y ConexionBD no son clases propias, las cubre el ORM de Django (igual que hizo Emiliano). El espacio, la tarifa, los horarios y las fotos se guardan en una sola transacción, así que si falla la base de datos (E2) no queda nada guardado a medias.
+15. SincronizadoIH, que sale en el diagrama de navegación, no es una pantalla aparte. Es solo el estado de la pantalla de precio cuando ya se sincronizó, como se ve en los prototipos.
+16. Del diagrama general tomé: idEmpresa de Espacio (quedó como "empresa"), formato y esValida() de Fotografia, esValida() de Tarifa, esValido() y seSuperponeCon() de HorarioDisponible, y descartarTemporales() de AlmacenDeImagenes.
+17. En Tarifa usé "periodo" (diagrama de Publicar espacio) y no "modalidad" (diagrama general). En pantalla dice "Modalidad de tarifa": por hora, por día o por semana.
+18. Agregué el campo id_calendario a Empresa en la app cuentas (migración 0002). Emiliano lo había dejado pendiente para cuando se hiciera lo de Google Calendar. El idCalendario que aparece en Espacio en el diagrama general no lo usé.
+19. GoogleCalendarService tiene revisarHorarios() y consultarEventos(idCal, rango). Se conecta con una cuenta de servicio y solo consulta si los horarios están libres u ocupados, no lee los eventos. En el diagrama de secuencia Google Calendar no aparece; ahí revisarHorarios está en PublicarEspacioService, que en el código le pasa la consulta a este servicio.
+20. Fotos: el diagrama de secuencia las guarda hasta publicar, pero el flujo E3 y su prototipo piden avisar antes. Lo que hice: en el paso 1 se revisan y se guardan en una carpeta temporal, y al publicar se copian a la carpeta final. Las temporales se borran hasta que el espacio ya quedó registrado.
+21. Hay métodos en la secuencia que no estaban en el diagrama de clases: guardarDatosYSincronizar(), capturarDatos(datos, empresa) de Espacio y mostrarAviso(). capturar_datos quedó en el modelo y los otros dos dentro de la vista.
+22. Falta agregar al diagrama la pantalla "Vincular Google Calendar" y su formulario.
+
+## Plan del proyecto
+23. Dependencias nuevas: Pillow 11.3.0 (para revisar las imágenes), google-api-python-client 2.190.0 y google-auth 2.45.0 (para Google Calendar).
+24. Las fotos se guardan en la carpeta media/ del proyecto porque no tenemos hosting.
+25. En el Plan dice que la sincronización con Google Calendar es bidireccional. En Publicar espacio solo se lee la disponibilidad; crear eventos le tocaría a Reservar espacio.
+
+## Pendientes y riesgos
+26. La llave de la cuenta de servicio se configura con la variable GOOGLE_CALENDAR_CREDENCIALES. No hay que subirla nunca al repositorio.
+27. Si alguien empieza a publicar y deja el formulario sin presionar "Cancelar", sus fotos temporales se quedan en media/espacios/temporales/. Por ahora no se borran solas.
+28. No hay límite de tamaño ni de cantidad de fotos.

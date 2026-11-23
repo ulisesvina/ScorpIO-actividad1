@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'presentacion',
-    'cuentas',
+    'cuentas', 
+    'espacios',
 ]
 
 MIDDLEWARE = [
@@ -151,3 +152,16 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'false').lower() in ('1', 'true', 'si', 'sí')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Reserva-Hub <no-reply@reserva-hub.local>')
+
+
+# --- Espacios (caso de uso Publicar espacio) ---
+
+# Archivos subidos por los usuarios (fotografías de los espacios)
+# AlmacenDeImagenes guarda aquí las imágenes; no hay hosting, se usa  local
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Google Calendar (cuenta de servicio),  ruta al archivo JSON de la llave; NUNCA
+# guardar la llave dentro del repositorio, si no se define, la sincronización
+# responde como "Google Calendar no disponible" 
+GOOGLE_CALENDAR_CREDENCIALES = os.environ.get('GOOGLE_CALENDAR_CREDENCIALES', '')

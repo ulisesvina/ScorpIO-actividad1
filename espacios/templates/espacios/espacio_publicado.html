@@ -1,0 +1,18 @@
+{% extends "espacios/base.html" %}
+{% block titulo %}Espacio publicado{% endblock %}
+{% block contenido %}
+  <div class="confirmacion">
+    <div class="icono-exito" aria-hidden="true">✓</div>
+    <h1>Espacio publicado</h1>
+    <p class="sub">{{ mensaje }} y ya está disponible para ser consultado por los clientes.</p>
+    <div class="espacio centrado">
+      <div>
+        <strong>{{ espacio.nombre }}</strong>
+        <div class="detalle">{{ espacio.tarifa }} · {{ espacio.capacidad }} personas</div>
+      </div>
+    </div>
+    <div class="acciones centradas">
+      <a class="boton secundario" href="{% url 'espacios:mis_espacios' %}">Volver a Mis espacios</a>
+    </div>
+  </div>
+{% endblock %}

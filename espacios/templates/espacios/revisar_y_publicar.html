@@ -1,0 +1,41 @@
+{% extends "espacios/base.html" %}
+{% block titulo %}Publicar espacio{% endblock %}
+{% block contenido %}
+  {% include "espacios/_pasos.html" with paso=3 titulo_paso="Revisar y publicar" %}
+
+  {% if errores %}
+    <div class="aviso error" role="alert">
+      {% for error in errores.values %}<div>{{ error }}</div>{% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="resumen">
+    <div class="fotos">{% for foto in fotografias %}<figure><img src="{{ foto.url }}" alt="{{ foto.nombre_archivo }}"></figure>{% endfor %}</div>
+    <dl>
+      <dt>Nombre</dt><dd>{{ espacio.nombre }}</dd>
+      <dt>Descripción</dt><dd>{{ espacio.descripcion|linebreaksbr }}</dd>
+      <dt>Capacidad</dt><dd>{{ espacio.capacidad }} personas</dd>
+      <dt>Dirección</dt><dd>{{ espacio.direccion }}</dd>
+      <dt>Empresa</dt><dd>{{ empresa.usuario.nombre }}</dd>
+      <dt>Precio</dt><dd>{{ tarifa }}</dd>
+      <dt>Horarios</dt>
+      <dd>
+        {% for horario in horarios %}{% if horario.disponible %}<div>{{ horario }}</div>{% endif %}{% endfor %}
+      </dd>
+      <dt>Google Calendar</dt><dd class="texto-exito">Sincronizado</dd>
+    </dl>
+    <p class="enlaces">
+      <a href="{% url 'espacios:formulario_espacio' %}">Editar información general</a>
+      <a href="{% url 'espacios:precio_y_horarios' %}">Editar precio y disponibilidad</a>
+    </p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="acciones">
+      <a class="boton secundario" href="{% url 'espacios:precio_y_horarios' %}">Atrás</a>
+      <button type="submit" class="boton" name="accion" value="publicar">Publicar espacio</button>
+    </div>
+    {% include "espacios/_error_modal.html" with titulo_modal="No fue posible publicar el espacio" accion_reintentar="publicar" %}
+  </form>
+{% endblock %}
