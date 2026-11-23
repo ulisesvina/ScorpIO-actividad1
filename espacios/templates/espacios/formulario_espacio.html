@@ -1,0 +1,48 @@
+{% extends "espacios/base.html" %}
+{% block titulo %}Publicar espacio{% endblock %}
+{% block contenido %}
+  {% include "espacios/_pasos.html" with paso=1 titulo_paso="Información general" %}
+
+  {% if error_general %}
+    <div class="aviso error" role="alert">{{ error_general }}</div>
+  {% elif form.errors %}
+    <div class="aviso error" role="alert">Revise los campos señalados antes de continuar.</div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    <div class="campo">
+      <label>Empresa</label>
+      <input type="text" value="{{ request.empresa.usuario.nombre }}" disabled>
+    </div>
+
+    {% include "cuentas/_campo.html" with campo=form.nombre %}
+    {% include "cuentas/_campo.html" with campo=form.descripcion %}
+    <div class="dos-columnas">
+      {% include "cuentas/_campo.html" with campo=form.capacidad %}
+      {% include "cuentas/_campo.html" with campo=form.direccion %}
+    </div>
+
+    <div class="campo{% if form.fotografias.errors %} con-error{% endif %}">
+      <label for="{{ form.fotografias.id_for_label }}">Fotografías<span class="obligatorio">* obligatorio</span></label>
+      {% if fotografias %}
+        <div class="fotos">
+          {% for foto in fotografias %}
+            <figure>
+              <img src="{{ foto.url }}" alt="{{ foto.nombre_archivo }}">
+              <button type="submit" name="quitar_fotografia" value="{{ forloop.counter0 }}" class="quitar" title="Quitar {{ foto.nombre_archivo }}">×</button>
+            </figure>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <div class="zona-fotos">{{ form.fotografias }}<p class="ayuda">JPEG o PNG. Puede seleccionar varias imágenes.</p></div>
+      {% for error in form.fotografias.errors %}<p class="error" role="alert">{{ error }}</p>{% endfor %}
+    </div>
+
+    <div class="acciones">
+      <button type="submit" class="boton secundario" form="form-cancelar">Cancelar</button>
+      <button type="submit" class="boton">Siguiente</button>
+    </div>
+  </form>
+  <form id="form-cancelar" method="post" action="{% url 'espacios:cancelar' %}">{% csrf_token %}</form>
+{% endblock %}

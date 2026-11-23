@@ -1,0 +1,63 @@
+{% extends "espacios/base.html" %}
+{% load static %}
+{% block titulo %}Buscar espacios{% endblock %}
+{% block contenido %}
+  <link rel="stylesheet" href="{% static 'espacios/catalogo.css' %}">
+  <div class="encabezado"><h1>Buscar espacios</h1></div>
+
+  <form method="get" class="filtros" novalidate>
+    <div class="campo">
+      <label for="{{ form.q.id_for_label }}">Buscar</label>{{ form.q }}
+    </div>
+    <div class="campo">
+      <label for="{{ form.ubicacion.id_for_label }}">Ubicación</label>{{ form.ubicacion }}
+    </div>
+    <div class="campo{% if form.fecha.errors %} con-error{% endif %}">
+      <label for="{{ form.fecha.id_for_label }}">Fecha</label>{{ form.fecha }}
+      {% for error in form.fecha.errors %}<p class="error" role="alert">{{ error }}</p>{% endfor %}
+    </div>
+    <div class="acciones">
+      <a class="boton secundario" href="{% url 'espacios:buscar_espacios' %}">Restablecer filtros</a>
+      <button type="submit" class="boton">Buscar</button>
+    </div>
+  </form>
+
+  {% if espacios %}
+    <div class="rejilla">
+      {% for espacio in espacios %}
+        <a class="tarjeta-espacio" href="{% url 'espacios:detalle_espacio' espacio.pk %}">
+          {% with foto=espacio.fotografias.all.0 %}
+            <img src="{% if foto %}{{ foto.archivo.url }}{% else %}{% static 'espacios/sin_imagen.svg' %}{% endif %}"
+                 alt="" onerror="this.onerror=null;this.src='{% static 'espacios/sin_imagen.svg' %}'">
+          {% endwith %}
+          <div class="datos">
+            <strong>{{ espacio.nombre }}</strong>
+            <span>{{ espacio.direccion }}</span>
+            <span class="precio">{{ espacio.tarifa }}</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% elif not sin_resultados and not aviso %}
+    <p class="vacio">Todavía no hay espacios publicados.</p>
+  {% endif %}
+
+  {% if sin_resultados or aviso %}
+    <dialog class="modal" id="dialogo-aviso">
+      <div class="icono-error" aria-hidden="true">!</div>
+      <p role="alert">{% if aviso %}{{ aviso }}{% else %}{{ mensaje_sin_resultados }}{% endif %}</p>
+      <div class="acciones centradas">
+        {% if sin_resultados %}<a class="boton secundario" href="{% url 'espacios:buscar_espacios' %}">Restablecer filtros</a>{% endif %}
+        <button type="button" class="boton" id="cerrar-aviso">Cerrar</button>
+      </div>
+    </dialog>
+    <script>
+      (function () {
+        var d = document.getElementById('dialogo-aviso');
+        if (!d || !d.showModal) return;
+        d.showModal();
+        document.getElementById('cerrar-aviso').addEventListener('click', function () { d.close(); });
+      })();
+    </script>
+  {% endif %}
+{% endblock %}
