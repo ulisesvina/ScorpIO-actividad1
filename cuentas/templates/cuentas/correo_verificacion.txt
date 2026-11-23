@@ -1,0 +1,10 @@
+{% autoescape off %}Hola {{ usuario.nombre }},
+
+Gracias por registrarte en Reserva-Hub. Para activar tu cuenta, abre el siguiente enlace:
+
+{{ url }}
+
+El enlace es de un solo uso y vence en {{ horas }} horas.
+
+Si no creaste esta cuenta, ignora este mensaje.
+{% endautoescape %}
