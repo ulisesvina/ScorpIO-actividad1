@@ -1,0 +1,50 @@
+{% extends "espacios/base.html" %}
+{% load static %}
+{% block titulo %}{{ espacio.nombre }}{% endblock %}
+{% block contenido %}
+  <link rel="stylesheet" href="{% static 'espacios/catalogo.css' %}">
+  <p class="migas"><a href="{% url 'espacios:buscar_espacios' %}">← Volver a Buscar espacios</a></p>
+  <h1>{{ espacio.nombre }}</h1>
+  <p class="sub">{{ espacio.direccion }} · {{ espacio.capacidad }} personas{% if espacio.tarifa %} · {{ espacio.tarifa }}{% endif %}</p>
+
+  <div class="galeria">
+    {% for foto in fotografias %}
+      <img src="{{ foto.archivo.url }}" alt="{{ foto.nombre_archivo }}"
+           onerror="this.onerror=null;this.src='{% static 'espacios/sin_imagen.svg' %}'">
+    {% empty %}
+      <img src="{% static 'espacios/sin_imagen.svg' %}" alt="Imagen no disponible">
+    {% endfor %}
+  </div>
+
+  <div class="resumen">
+    <dl>
+      <dt>Descripción</dt><dd>{{ espacio.descripcion|linebreaksbr }}</dd>
+      <dt>Empresa</dt><dd>{{ espacio.empresa.usuario.nombre }}</dd>
+      <dt>Capacidad</dt><dd>{{ espacio.capacidad }} personas</dd>
+      <dt>Ubicación</dt><dd>{{ espacio.direccion }}</dd>
+      <dt>Precio</dt><dd>{{ espacio.tarifa }}</dd>
+    </dl>
+  </div>
+
+  <h2 class="subtitulo">Horarios disponibles</h2>
+  {% if horarios %}
+    <table class="horarios">
+      <thead><tr><th>Día</th><th>Horario</th></tr></thead>
+      <tbody>
+        {% for horario in horarios %}
+          <tr><td>{{ horario.get_dia_display }}</td><td>{{ horario.hora_inicio|time:"H:i" }}–{{ horario.hora_fin|time:"H:i" }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="ayuda">Horarios semanales. Se pueden reservar del 1 de noviembre al 31 de diciembre de 2026.</p>
+  {% else %}
+    <p class="vacio">Este espacio no tiene horarios disponibles por ahora.</p>
+  {% endif %}
+
+  <h2 class="subtitulo">Políticas de reservación y cancelación</h2>
+  <p>{{ politicas }}</p>
+
+  <div class="acciones">
+    <button type="button" class="boton" disabled title="Se habilitará con el caso de uso Reservar espacio">Reservar espacio</button>
+  </div>
+{% endblock %}
