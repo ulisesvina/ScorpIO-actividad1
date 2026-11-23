@@ -131,8 +131,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'cuentas.Usuario'
 
-# PROVISIONAL: se reemplaza al implementar el caso de uso Iniciar sesión.
 LOGIN_URL = 'cuentas:iniciar_sesion'
+LOGIN_REDIRECT_URL = 'cuentas:inicio'
 
 # Vigencia del enlace de verificación de correo (la especificación no la define).
 VERIFICACION_CORREO_HORAS = int(os.environ.get('VERIFICACION_CORREO_HORAS', '24'))
