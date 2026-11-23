@@ -1,0 +1,23 @@
+.cabecera { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.menu-usuario { display: flex; align-items: center; gap: 18px; font-weight: 400; }
+.menu-usuario a, .menu-usuario .enlace-boton {
+  color: #fff; text-decoration: none; background: none; border: 0; font: inherit; cursor: pointer; padding: 0;
+}
+.menu-usuario a:hover, .menu-usuario .enlace-boton:hover { text-decoration: underline; }
+
+button.acceso { font: inherit; font-weight: 600; text-align: left; cursor: pointer; width: 100%; }
+
+dialog.dialogo {
+  border: 0; border-radius: 10px; padding: 28px; max-width: 400px; text-align: center;
+  font-weight: 400; color: var(--color-texto); box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
+dialog.dialogo::backdrop { background: rgba(0,0,0,.4); }
+dialog.dialogo h2 { font-size: 1.1rem; margin: 0 0 8px; }
+dialog.dialogo p { color: var(--color-suave); margin: 0 0 8px; }
+dialog.dialogo form { margin: 0; }
+.dialogo .acciones { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+.icono-aviso {
+  width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 12px; display: flex;
+  align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700;
+  background: #fef3c7; color: #92400e;
+}

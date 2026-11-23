@@ -1,0 +1,15 @@
+{% if messages %}
+<dialog class="dialogo" id="dialogo-mensajes">
+  <div class="icono-aviso" aria-hidden="true">!</div>
+  {% for mensaje in messages %}<p role="alert">{{ mensaje }}</p>{% endfor %}
+  <div class="acciones"><button type="button" class="boton" id="cerrar-mensajes">Entendido</button></div>
+</dialog>
+<script>
+  (function () {
+    var d = document.getElementById('dialogo-mensajes');
+    if (!d || !d.showModal) return;
+    d.showModal();
+    document.getElementById('cerrar-mensajes').addEventListener('click', function () { d.close(); });
+  })();
+</script>
+{% endif %}
