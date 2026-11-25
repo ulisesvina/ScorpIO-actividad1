@@ -53,4 +53,4 @@ Abre <http://127.0.0.1:8000/> en el navegador. Para detener el servidor, presion
 
 - Belén — Responsable y Colaboración: http://127.0.0.1:8000/belen/
 
-- Emilaino — Responsable: http://127.0.0.1:8000/tunombre/
+- Emiliano — Responsable: http://127.0.0.1:8000/emiliano/
