@@ -112,3 +112,41 @@ y en el diagrama de secuencia, y cuando les faltaba algo lo tomé del diagrama g
 26. La llave de la cuenta de servicio se configura con la variable GOOGLE_CALENDAR_CREDENCIALES. No hay que subirla nunca al repositorio.
 27. Si alguien empieza a publicar y deja el formulario sin presionar "Cancelar", sus fotos temporales se quedan en media/espacios/temporales/. Por ahora no se borran solas.
 28. No hay límite de tamaño ni de cantidad de fotos.
+
+---
+
+# Anotaciones — Caso de uso: Editar espacio
+
+Igual que en los casos anteriores, aquí está lo que quedó diferente a los documentos. Me basé en el
+diagrama de clases de Editar espacio (`plan/Editar Espacio.drawio.xml`) y reutilicé lo que ya estaba
+hecho en Publicar espacio.
+
+## Especificación de requerimientos
+1. Los mensajes de las reglas nuevas no estaban definidos; quedaron así:
+   «La capacidad no puede ser menor a N personas: hay reservaciones vigentes para esa cantidad»,
+   «Hay reservaciones vigentes fuera de los horarios disponibles (fechas). Conserve esos horarios para poder guardar los cambios»,
+   «Los cambios del espacio se guardaron correctamente» y, para E2, «No fue posible guardar los cambios. Intente nuevamente más tarde».
+   Los demás (campos vacíos, fotos, precio, horarios, Google Calendar, E3) son los mismos de Publicar espacio.
+2. **Reservación vigente:** estado pendiente o confirmada y que todavía no termina. Las canceladas, finalizadas o pasadas no impiden cambios.
+3. Una reservación sigue siendo compatible si cabe en la capacidad y queda completa dentro de un horario **disponible** del mismo día de la semana.
+4. Las reservaciones se revisan tres veces: al continuar del paso 1 (capacidad), al continuar del paso 2 (horarios) y otra vez justo antes de guardar (`revalidar`), por si alguien reservó mientras se editaba.
+5. Si no cambian el precio ni los horarios se puede guardar sin volver a sincronizar Google Calendar. Si cambian, se pide sincronizar otra vez (igual que la nota 8 de Publicar espacio).
+6. Las fotografías que se quitan se borran hasta presionar «Guardar cambios»; las nuevas se guardan como temporales igual que al publicar. Si se cancela, el espacio queda como estaba.
+7. Solo se pueden editar espacios publicados. Un espacio de otra empresa responde 404.
+
+## Diseño detallado (diagramas)
+8. `EditarEspacioController` (capa controlador) y `EditarEspacioServicio` (atributo `servicio` de `EspacioControllerEditarEspacio`) son la misma clase: `servicios/editar_espacio.py`. `EspacioControllerEditarEspacio` son las vistas de `views_edicion.py`.
+9. `EspacioRepositorio`, `ReservacionRepositorio` y `ConexionBD` no son clases propias, las cubre el ORM (como en los otros casos). `actualizarAtomico` es `actualizar_espacio()`: todo se guarda en una transacción con el espacio bloqueado (`select_for_update`).
+10. `DatosEdicionEspacioController` no es una clase: sus atributos viven en la sesión (`editar_espacio`) y en `FormularioEdicionEspacio` (`forms_edicion.py`). `invalidarSincronizacion()` y `descartar()` son funciones de la vista.
+11. **`Reservacion`** se crea aquí con lo que trae el diagrama (`inicio`, `fin`, `cantidadPersonas`, `estado`, `esVigente()`, `esCompatibleCon()`) y la relación 1 Espacio → 0..* Reservaciones. **No tiene cliente**: lo debe agregar Reservar espacio. Los estados (pendiente, confirmada, cancelada, finalizada) no estaban definidos. Se registró en el admin para poder hacer pruebas.
+12. **`dimensionesM2`** se agregó a `Espacio` como opcional, porque los espacios ya publicados no lo tienen y Publicar espacio no lo pide. Solo se captura al editar. Si se quiere obligatorio, hay que agregarlo también a Publicar espacio.
+13. `idCalendario` de `Espacio` no se usó: se sigue tomando de `Empresa.id_calendario` (nota 18 de Publicar espacio).
+14. Las pantallas `FormularioEspacioIH` y `PantallaPrecioYHorariosIH` son las mismas plantillas de Publicar espacio con el título «Editar espacio» y su propio botón Cancelar. `PantallaRevisarYGuardar` es `revisar_y_guardar.html` y su `mostrarMensaje()` / `volverAMisEspacios()` es la pantalla `espacio_actualizado.html`.
+15. `PantallaMisEspaciosIH.editarEspacios()` es el botón «Editar» de Mis espacios. `listarMisEspacios()` ya existía (vista `mis_espacios`).
+16. De `AlmacénDeImagenes` solo se usan `guardarFotografias()` y `descartarTemporales()`. `server_url`, `descargarFotografias()` y `obtenerPlaceholder()` no aplican a este caso.
+17. Al recargar un espacio guardado no se puede saber si un horario no disponible lo desactivó la empresa o estaba ocupado en Google Calendar (en la base solo hay `disponible`); en el paso 2 aparece como desactivado.
+
+## Pendientes y riesgos
+18. La pantalla «Vincular Google Calendar» regresa a Mis espacios aunque se haya entrado desde la edición.
+19. Cuando Reservar espacio cree eventos en Google Calendar, al volver a sincronizar los horarios de una reservación podrían salir como «ocupados» y la edición marcaría la reservación como fuera de horario. Hay que distinguir esos eventos cuando se implemente.
+20. Igual que en Publicar espacio, las fotos temporales de una edición abandonada sin cancelar se quedan en `media/espacios/temporales/`.

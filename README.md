@@ -165,3 +165,34 @@ Después entrar a <http://127.0.0.1:8000/admin/login/?next=/espacios/>.
 ```bash
 python manage.py test espacios
 ```
+
+## Editar espacio
+
+Solo la Empresa dueña del espacio puede editarlo (con sesión iniciada). Desde **Mis espacios** (`/espacios/`) cada espacio publicado tiene el botón **Editar**. Rutas de la app `espacios`:
+
+| Ruta | Para qué sirve |
+|---|---|
+| `/espacios/<id>/editar/` | Carga los datos guardados del espacio y abre el paso 1 |
+| `/espacios/<id>/editar/informacion/` | Paso 1: información general, dimensiones y fotos |
+| `/espacios/<id>/editar/precio-y-horarios/` | Paso 2: precio, modalidad, horarios y Google Calendar |
+| `/espacios/<id>/editar/revisar/` | Paso 3: revisar y guardar cambios |
+| `/espacios/<id>/editar/cancelar/` | Descarta los cambios (el espacio no se modifica) |
+| `/espacios/<id>/actualizado/` | Mensaje de cambios guardados |
+
+- Nada se guarda en la base de datos hasta presionar **Guardar cambios**.
+- Si no cambian el precio ni los horarios, se puede continuar sin volver a sincronizar Google Calendar; si cambian, hay que sincronizar de nuevo.
+- No se puede bajar la capacidad ni quitar horarios si eso deja fuera a una **reservación vigente** (pendiente o confirmada que aún no termina).
+
+Esta versión agrega la migración `espacios.0002` (campo `dimensiones_m2` y modelo `Reservacion`), así que hay que correr `python manage.py migrate`.
+
+### Probarlo en local
+
+1. Iniciar sesión con una empresa y publicar un espacio (ver «Publicar espacio»).
+2. Como todavía no existe «Reservar espacio», para probar las reservaciones crear una desde <http://127.0.0.1:8000/admin/espacios/reservacion/add/> (con un usuario staff) en un día y hora que estén dentro de los horarios del espacio.
+3. Entrar a <http://127.0.0.1:8000/espacios/> → **Editar** e intentar bajar la capacidad por debajo de esa reservación o quitar su horario.
+
+### Pruebas
+
+```bash
+python manage.py test espacios.tests.test_reservacion espacios.tests.test_editar_espacio_servicio espacios.tests.test_editar_espacio_vistas
+```
