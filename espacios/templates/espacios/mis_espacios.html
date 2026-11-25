@@ -15,6 +15,9 @@
         <strong>{{ espacio.nombre }}</strong> <span class="etiqueta">{{ espacio.get_estado_display }}</span>
         <div class="detalle">{{ espacio.direccion }} · {{ espacio.capacidad }} personas{% if espacio.tarifa %} · {{ espacio.tarifa }}{% endif %}</div>
       </div>
+      {% if espacio.esta_disponible %}
+        <a class="boton secundario chico editar" href="{% url 'espacios:abrir_edicion' espacio.pk %}">Editar</a>
+      {% endif %}
     </div>
   {% empty %}
     <p class="vacio">Todavía no tienes espacios publicados.</p>

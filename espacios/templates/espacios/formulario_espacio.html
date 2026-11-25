@@ -1,5 +1,5 @@
 {% extends "espacios/base.html" %}
-{% block titulo %}Publicar espacio{% endblock %}
+{% block titulo %}{{ titulo_caso|default:"Publicar espacio" }}{% endblock %}
 {% block contenido %}
   {% include "espacios/_pasos.html" with paso=1 titulo_paso="Información general" %}
 
@@ -22,6 +22,9 @@
       {% include "cuentas/_campo.html" with campo=form.capacidad %}
       {% include "cuentas/_campo.html" with campo=form.direccion %}
     </div>
+    {% if 'dimensiones_m2' in form.fields %}
+      {% include "cuentas/_campo.html" with campo=form.dimensiones_m2 %}
+    {% endif %}
 
     <div class="campo{% if form.fotografias.errors %} con-error{% endif %}">
       <label for="{{ form.fotografias.id_for_label }}">Fotografías<span class="obligatorio">* obligatorio</span></label>
@@ -44,5 +47,5 @@
       <button type="submit" class="boton">Siguiente</button>
     </div>
   </form>
-  <form id="form-cancelar" method="post" action="{% url 'espacios:cancelar' %}">{% csrf_token %}</form>
+  <form id="form-cancelar" method="post" action="{% if url_cancelar %}{{ url_cancelar }}{% else %}{% url 'espacios:cancelar' %}{% endif %}">{% csrf_token %}</form>
 {% endblock %}

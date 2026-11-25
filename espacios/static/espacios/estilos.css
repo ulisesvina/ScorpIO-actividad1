@@ -72,3 +72,6 @@ code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; font-size: .9r
   .resumen dl { grid-template-columns: 1fr; }
   .calendario { flex-direction: column; align-items: flex-start; }
 }
+
+/* Editar espacio */
+.espacio .editar { margin-left: auto; flex-shrink: 0; }

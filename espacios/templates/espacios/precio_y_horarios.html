@@ -1,5 +1,5 @@
 {% extends "espacios/base.html" %}
-{% block titulo %}Publicar espacio{% endblock %}
+{% block titulo %}{{ titulo_caso|default:"Publicar espacio" }}{% endblock %}
 {% block contenido %}
   {% include "espacios/_pasos.html" with paso=2 titulo_paso="Precio y disponibilidad" %}
 
