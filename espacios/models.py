@@ -5,10 +5,14 @@ Corresponde con el diagrama de clases de Publicar espacio (y el general):
 - Fotografia        -> Fotografia (idFoto -> id; ubicacion -> archivo)
 - Tarifa            -> Tarifa (precio, periodo)
 - HorarioDisponible -> HorarioDisponible (dia, horaInicio, horaFin, disponible)
+- Reservacion       -> Reservacion (agregada por el caso de uso Editar espacio)
 - EspacioBD / EspacioRepository / ConexionBD -> ORM de Django (igual que en cuentas)
 """
+from decimal import Decimal
+
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 
 class Espacio(models.Model):
@@ -26,6 +30,12 @@ class Espacio(models.Model):
     descripcion = models.TextField('descripción')
     capacidad = models.PositiveIntegerField('capacidad', validators=[MinValueValidator(1)])
     direccion = models.CharField('dirección', max_length=255)
+    # Agregado por el caso de uso Editar espacio (dimensionesM2). Opcional: los espacios
+    # publicados antes no lo tienen y Publicar espacio no lo pide
+    dimensiones_m2 = models.DecimalField(
+        'dimensiones (m²)', max_digits=8, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(Decimal('0.01'))],
+    )
     estado = models.CharField('estado', max_length=20, choices=ESTADOS)
 
     class Meta:
@@ -51,6 +61,29 @@ class Espacio(models.Model):
     def publicar(self):
         """marca el espacio como publicado para que los clientes puedan verlo"""
         self.estado = self.PUBLICADO
+
+    # --- Editar espacio ---
+
+    def pertenece_a(self, empresa):
+        """True si el espacio es de la Empresa indicada (solo su dueña puede editarlo)"""
+        return empresa is not None and self.empresa_id == empresa.pk
+
+    def esta_disponible(self):
+        """True si el espacio sigue publicado y, por lo tanto, se puede editar"""
+        return self.estado == self.PUBLICADO
+
+    def aplicar_cambios(self, datos):
+        """asigna la información general editada; idEspacio e idEmpresa son inmutables
+
+        `datos` es un dict con: nombre, descripcion, capacidad, direccion y (opcional)
+        dimensiones_m2. No guarda en la base de datos
+        """
+        self.nombre = datos['nombre']
+        self.descripcion = datos['descripcion']
+        self.capacidad = datos['capacidad']
+        self.direccion = datos['direccion']
+        self.dimensiones_m2 = datos.get('dimensiones_m2')
+        return self
 
 
 class Fotografia(models.Model):
@@ -144,4 +177,73 @@ class HorarioDisponible(models.Model):
             self.dia == otro.dia
             and self.hora_inicio < otro.hora_fin
             and otro.hora_inicio < self.hora_fin
+        )
+
+
+class Reservacion(models.Model):
+    """Reservación de un espacio (1 Espacio tiene 0..* Reservaciones)
+
+    La crea el caso de uso Reservar espacio; Editar espacio solo la consulta para no
+    dejar fuera de capacidad u horario a las reservaciones vigentes
+    """
+
+    PENDIENTE = 'pendiente'
+    CONFIRMADA = 'confirmada'
+    CANCELADA = 'cancelada'
+    FINALIZADA = 'finalizada'
+    ESTADOS = [
+        (PENDIENTE, 'Pendiente'),
+        (CONFIRMADA, 'Confirmada'),
+        (CANCELADA, 'Cancelada'),
+        (FINALIZADA, 'Finalizada'),
+    ]
+    ESTADOS_VIGENTES = (PENDIENTE, CONFIRMADA)
+
+    # Mismo orden que date.weekday(): lunes = 0 ... domingo = 6
+    DIAS_SEMANA = [clave for clave, _ in HorarioDisponible.DIAS]
+
+    espacio = models.ForeignKey(Espacio, on_delete=models.CASCADE, related_name='reservaciones')
+    inicio = models.DateTimeField('inicio')
+    fin = models.DateTimeField('fin')
+    cantidad_personas = models.PositiveIntegerField('cantidad de personas', validators=[MinValueValidator(1)])
+    estado = models.CharField('estado', max_length=20, choices=ESTADOS, default=PENDIENTE)
+
+    class Meta:
+        verbose_name = 'reservación'
+        verbose_name_plural = 'reservaciones'
+        ordering = ['inicio']
+
+    def __str__(self):
+        inicio = timezone.localtime(self.inicio)
+        fin = timezone.localtime(self.fin)
+        return '%s %s–%s' % (inicio.strftime('%d/%m/%Y'), inicio.strftime('%H:%M'), fin.strftime('%H:%M'))
+
+    def es_vigente(self, ahora=None):
+        """True si no está cancelada ni finalizada y todavía no termina"""
+        return self.estado in self.ESTADOS_VIGENTES and self.fin > (ahora or timezone.now())
+
+    def es_compatible_con(self, datos):
+        """True si la reservación cabe en los datos editados del espacio
+
+        `datos` es un dict con `capacidad` y `horarios` (instancias de HorarioDisponible).
+        Debe cumplir la capacidad y quedar completa dentro de un horario disponible
+        del mismo día de la semana. Si falta alguno de los dos, esa parte no se revisa
+        """
+        capacidad = datos.get('capacidad')
+        if capacidad is not None and self.cantidad_personas > capacidad:
+            return False
+        horarios = datos.get('horarios')
+        return horarios is None or self.cabe_en_horarios(horarios)
+
+    def cabe_en_horarios(self, horarios):
+        """True si la reservación queda completa dentro de un horario disponible de su día"""
+        inicio = timezone.localtime(self.inicio)
+        fin = timezone.localtime(self.fin)
+        if inicio.date() != fin.date():
+            return False  # los horarios son por día: una reservación de varios días no cabe
+        dia = self.DIAS_SEMANA[inicio.weekday()]
+        return any(
+            horario.disponible and horario.dia == dia
+            and horario.hora_inicio <= inicio.time() and fin.time() <= horario.hora_fin
+            for horario in horarios
         )

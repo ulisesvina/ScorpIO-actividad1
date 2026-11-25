@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Espacio, Fotografia, HorarioDisponible, Tarifa
+from .models import Espacio, Fotografia, HorarioDisponible, Reservacion, Tarifa
 
 
 class TarifaEnLinea(admin.StackedInline):
@@ -24,3 +24,13 @@ class EspacioAdmin(admin.ModelAdmin):
     list_filter = ('estado',)
     search_fields = ('nombre', 'direccion', 'empresa__usuario__nombre')
     inlines = [TarifaEnLinea, HorarioEnLinea, FotografiaEnLinea]
+
+
+@admin.register(Reservacion)
+class ReservacionAdmin(admin.ModelAdmin):
+    """Agregado por Editar espacio: permite crear reservaciones de prueba mientras no exista Reservar espacio"""
+
+    list_display = ('espacio', 'inicio', 'fin', 'cantidad_personas', 'estado')
+    list_filter = ('estado',)
+    search_fields = ('espacio__nombre',)
+    date_hierarchy = 'inicio'
